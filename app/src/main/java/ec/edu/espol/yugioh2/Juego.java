@@ -80,9 +80,12 @@ public class Juego {
         }
         else if (cartaAtacante.eModoAtaque() && cartaOponente.eModoDefensa()) {
             if (cartaAtacante.getAtaque() > cartaOponente.getDefensa()) {
-                Utilitaria.noHayCarta(context, monstruoO, cartaOponente);
                 oponente.getTablero().removerCarta(cartaOponente);
                 cartaOponente.destruida();
+                ArrayList<Carta> orgo= new ArrayList<>();
+                for(CartaMonstruo c : oponente.getTablero().getCartasMons())
+                    orgo.add(c);
+                Utilitaria.organizarTablero(context,orgo,monstruoO);
                 return "Carta oponente destruida.\n";
             } else if (cartaAtacante.getAtaque() < cartaOponente.getDefensa()) {
                 int diferencia = cartaAtacante.getAtaque() - cartaOponente.getDefensa();
@@ -91,6 +94,10 @@ public class Juego {
                 vidaJugador.setText("LP de "+atacante.getNombre()+": "+atacante.getPuntos());
                 cartaOponente.modoAtaque();
                 cartaOponente.setPosicion(Posicion.HORIZONTAL);
+                ArrayList<Carta> orgo= new ArrayList<>();
+                for(CartaMonstruo c : oponente.getTablero().getCartasMons())
+                    orgo.add(c);
+                Utilitaria.organizarTablero(context,orgo,monstruoO);
                 return "Ataque fallido, puntos del atacante actualizados.\n";
             } else {
                 return "Carta " + cartaAtacante.getNombre() + " no pudo atacar " + cartaOponente.getNombre() + "\n Mismo ataque y defensa";
@@ -294,7 +301,18 @@ public class Juego {
             Toast.makeText(context, "La maquina tomo la carta "+ctm.getNombre(), Toast.LENGTH_SHORT).show();
             Utilitaria.crearyAgregar(context,ctm,manoM);
             Utilitaria.eliminarClickListenersTablero(monstruosJ, monstruosM, especialesJ, especialesM);
+            if (turno>=3)
+            {
+                String maquinaB = this.mBatalla(jugador,monstruosM,monstruosJ,especialesJ,especialesM,vidaJView,vidaMView);
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Batalla de la Máquina");
+                builder.setMessage(maquinaB);
 
+                // Botón "OK" para cerrar el diálogo
+                builder.setPositiveButton("OK", (dialog, which) -> {
+                    dialog.dismiss(); // Cierra el cuadro de diálogo
+                });
+            }
         }
         if (fase.equals("Fase Principal")) {
 
@@ -309,6 +327,11 @@ public class Juego {
                 Utilitaria.reemplazar(context, carta, especialesM);
                 Utilitaria.removerImageView(context, manoM, carta);
             }
+            Utilitaria.organizarTablero(context,maquina.getTablero().getEspeciales(),especialesM);
+            ArrayList<Carta> orga= new ArrayList<>();
+            for(CartaMonstruo c : maquina.getTablero().getCartasMons())
+                orga.add(c);
+            Utilitaria.organizarTablero(context,orga,monstruosM);
 
         }
 
@@ -328,15 +351,7 @@ public class Juego {
                 builder.show();
                 turno+=1;
             }else {
-                String maquinaB = this.mBatalla(jugador,monstruosM,monstruosJ,especialesJ,especialesM,vidaJView,vidaMView);
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("Batalla de la Máquina");
-                builder.setMessage(maquinaB);
 
-                // Botón "OK" para cerrar el diálogo
-                builder.setPositiveButton("OK", (dialog, which) -> {
-                    dialog.dismiss(); // Cierra el cuadro de diálogo
-                });
                 Utilitaria.mostrarDetallesbatalla(context, monstruosJ,monstruosM,especialesJ,especialesM,jugador.getTablero().getCartasMons(),jugador.getTablero().getEspeciales(),maquina.getTablero().getCartasMons(),maquina.getTablero().getEspeciales(),jugador,maquina,vidaJView,vidaMView);
 
                 turno++;
